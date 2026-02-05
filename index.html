@@ -3,23 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PukiPuki — твой робот-друг</title>
+  <title>PukiPuki ChatBot</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="robot">
-  <div id="face">
-    <div class="eye left"></div>
-    <div class="eye right"></div>
-    <div class="smile"></div>
-  </div>
-  <div class="arm left"></div>
-  <div class="arm right"></div>
-</div>
+<div class="container">
 
-<div id="card">Нажми кнопку и скажи что-нибудь</div>
-<button id="talkBtn">🎤 Говорить</button>
+  <!-- Боковая панель с историей -->
+  <aside class="sidebar">
+    <h2>История</h2>
+    <ul id="history"></ul>
+  </aside>
+
+  <!-- Основная область чата -->
+  <main class="chat-area">
+    <div id="robot">
+      <div id="face">
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+        <div class="smile"></div>
+      </div>
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+    </div>
+
+    <div id="chat" class="chat-window"></div>
+
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Напиши или скажи что-нибудь..." />
+      <button id="talkBtn">🎤</button>
+    </div>
+
+    <div id="status" class="status">ИИ думает...</div>
+  </main>
+
+</div>
 
 <script src="script.js"></script>
 </body>
