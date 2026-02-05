@@ -1,0 +1,132 @@
+body {
+  background: #1a0a2a;
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+  margin: 0;
+  padding-top: 40px;
+  color: white;
+}
+
+/* Робот */
+#robot {
+  width: 260px;
+  text-align: center;
+  position: relative;
+}
+
+/* Лицо */
+#face {
+  width: 200px;
+  height: 200px;
+  background: #2a1a40;
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 0 40px rgba(255,200,255,0.3);
+}
+
+/* Глаза — большие, светло-фиолетовые */
+.eye {
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle at 25% 25%, #e0c7ff, #aa88ff);
+  border-radius: 50%;
+  position: absolute;
+  top: 55px;
+  transition: height 0.15s;
+  box-shadow: 0 0 20px rgba(200,150,255,0.9);
+}
+.eye.left { left: 35px; }
+.eye.right { right: 35px; }
+
+/* Блик */
+.eye::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+}
+
+/* Щёки */
+#face::before {
+  content: "";
+  width: 30px;
+  height: 15px;
+  background: rgba(255,150,200,0.4);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 60px;
+  left: 20px;
+}
+#face::after {
+  content: "";
+  width: 30px;
+  height: 15px;
+  background: rgba(255,150,200,0.4);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 60px;
+  right: 20px;
+}
+
+/* Улыбка — широкая и милая */
+.smile {
+  width: 100px;
+  height: 50px;
+  border-bottom: 4px solid #d0aaff;
+  border-radius: 0 0 60px 60px;
+  position: absolute;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Руки */
+.arm {
+  width: 22px;
+  height: 75px;
+  background: #140610;
+  position: absolute;
+  top: 110px;
+  border-radius: 20px;
+  transform-origin: top center;
+  transition: transform 0.3s;
+}
+.arm.left { left: -22px; }
+.arm.right { right: -22px; }
+
+/* Табличка */
+#card {
+  margin-top: 200px;
+  padding: 14px;
+  background: rgba(40,10,30,0.9);
+  border-radius: 16px;
+  box-shadow: 0 0 15px rgba(200,150,255,0.25);
+  min-height: 48px;
+  font-weight: bold;
+  max-width: 90%;
+  text-align: center;
+}
+
+/* Кнопка */
+#talkBtn {
+  margin-top: 16px;
+  padding: 10px 18px;
+  background: linear-gradient(135deg, #cbb0ff, #aa88ff);
+  border: none;
+  border-radius: 25px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+#talkBtn:hover {
+  opacity: 0.9;
+}
