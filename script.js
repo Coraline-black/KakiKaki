@@ -1,99 +1,76 @@
 const tabletText = document.querySelector("#tablet .text-content");
 const micBtn = document.getElementById("micBtn");
 const eyes = document.querySelectorAll(".eye");
-const smile = document.querySelector(".smile");
 
-// 1. Плавная печать текста (без голоса)
+// Функция красивой печати текста
 async function typeWriter(text) {
-    tabletText.innerHTML = "";
+    tabletText.textContent = "";
     let i = 0;
-    // Скорость печати: 30мс на символ
     for (let char of text) {
-        tabletText.innerHTML += char;
+        tabletText.textContent += char;
         await new Promise(r => setTimeout(r, 30));
-        // Автопрокрутка вниз, если текст длинный
-        tabletText.scrollTop = tabletText.scrollHeight;
     }
 }
 
-// 2. Индикация состояний (Визуальный интеллект)
-function setStatus(status) {
+// Управление анимацией глаз
+function setRobotStatus(status) {
     eyes.forEach(e => e.classList.remove('pulse-eye'));
-    
-    if (status === 'listen') {
-        eyes.forEach(e => e.style.background = "#ff00ff"); // Розовый — слушаю
-        tabletText.textContent = "Слушаю тебя...";
-    } else if (status === 'think') {
-        eyes.forEach(e => e.style.background = "#ffcc00"); // Желтый — думаю
-        eyes.forEach(e => e.classList.add('pulse-eye'));
-        tabletText.textContent = "Обрабатываю запрос...";
-    } else if (status === 'error') {
-        eyes.forEach(e => e.style.background = "#ff4444"); // Красный — сбой
-        tabletText.textContent = "Что-то пошло не так... Попробуй еще раз.";
+    if (status === 'think') {
+        eyes.forEach(e => {
+            e.style.background = "#ffcc00"; // Желтый — думает
+            e.classList.add('pulse-eye');
+        });
+    } else if (status === 'listen') {
+        eyes.forEach(e => e.style.background = "#ff00ff"); // Розовый — слушает
     } else {
-        eyes.forEach(e => e.style.background = "#00f2ff"); // Голубой — жду
+        eyes.forEach(e => e.style.background = "#00f2ff"); // Голубой — ждет
     }
 }
 
-// 3. Главная функция общения
-async function askAI(userMessage) {
-    setStatus('think');
+// Запрос к ИИ
+async function askAI(message) {
+    setRobotStatus('think');
+    tabletText.textContent = "Обрабатываю запрос...";
 
     try {
-        // Таймаут 15 секунд, чтобы не висел вечно
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 15000);
-
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: userMessage }),
-            signal: controller.signal
+            body: JSON.stringify({ message: message })
         });
 
-        clearTimeout(timeout);
         const data = await response.json();
+        setRobotStatus('idle');
         
-        setStatus('idle');
-        
-        // Если API прислало ответ — печатаем его
         if (data.answer) {
             await typeWriter(data.answer);
         } else {
-            await typeWriter("Я задумался и не нашел ответа. Давай спросим по-другому?");
+            await typeWriter("Я получил пустой ответ. Попробуй еще раз!");
         }
-
-    } catch (err) {
-        console.error("Ошибка:", err);
-        setStatus('error');
-        await typeWriter("Не удалось связаться с сервером. Проверь интернет!");
+    } catch (error) {
+        setRobotStatus('idle');
+        await typeWriter("Ошибка связи с сервером. Проверь интернет!");
     }
 }
 
-// 4. Голосовое управление (Speech Recognition)
+// Работа с микрофоном
 micBtn.onclick = () => {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (!Speech) {
-        tabletText.textContent = "Твой браузер не поддерживает распознавание речи.";
-        return;
-    }
+    if (!Speech) return alert("Браузер не поддерживает голос.");
 
     const recognition = new Speech();
     recognition.lang = 'ru-RU';
-    recognition.interimResults = false; // Ждем финальную фразу
 
-    recognition.onstart = () => setStatus('listen');
-    
+    recognition.onstart = () => {
+        setRobotStatus('listen');
+        tabletText.textContent = "Слушаю тебя...";
+    };
+
     recognition.onresult = (event) => {
-        const result = event.results[0][0].transcript;
-        askAI(result); // Отправляем распознанный текст нейросети
+        const transcript = event.results[0][0].transcript;
+        askAI(transcript);
     };
 
-    recognition.onerror = () => setStatus('idle');
-    recognition.onend = () => {
-        if (tabletText.textContent === "Слушаю тебя...") setStatus('idle');
-    };
-
+    recognition.onerror = () => setRobotStatus('idle');
     recognition.start();
 };
