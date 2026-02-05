@@ -1,82 +1,104 @@
-const tablet = document.getElementById("tablet");
+const tabletText = document.querySelector("#tablet .text-content");
 const micBtn = document.getElementById("micBtn");
-const robotFace = document.getElementById("face");
 const eyes = document.querySelectorAll(".eye");
-const leftArm = document.querySelector(".arm.left");
-const rightArm = document.querySelector(".arm.right");
+const smile = document.querySelector(".smile");
 
-// Моргание глаз каждые 2.5 секунды
-setInterval(() => {
-  eyes.forEach(e => e.style.height="6px");
-  setTimeout(() => eyes.forEach(e=>e.style.height="45px"),180);
-},2500);
+// 1. Анимация моргания
+function blink() {
+  eyes.forEach(e => e.style.transform = "scaleY(0.1)");
+  setTimeout(() => {
+    eyes.forEach(e => e.style.transform = "scaleY(1)");
+  }, 150);
+}
+setInterval(blink, 4000);
 
-// Жесты рук и головы
-function gesture(yes=true){
-  rightArm.style.transform="rotate(25deg)";
-  leftArm.style.transform="rotate(-15deg)";
-  robotFace.style.transform=yes?"rotate(5deg)":"rotate(-5deg)";
-  setTimeout(()=>{
-    rightArm.style.transform="rotate(0deg)";
-    leftArm.style.transform="rotate(0deg)";
-    robotFace.style.transform="rotate(0deg)";
-  },500);
+// 2. Улучшенный эффект печати
+async function typeWriter(text) {
+  tabletText.innerHTML = "";
+  let i = 0;
+  const speed = 30; // Скорость печати
+  
+  return new Promise((resolve) => {
+    function type() {
+      if (i < text.length) {
+        tabletText.innerHTML += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      } else {
+        resolve();
+      }
+    }
+    type();
+  });
 }
 
-// Память
-let memory = JSON.parse(localStorage.getItem("robotMemory")||"{}");
-function saveMemory(){ localStorage.setItem("robotMemory",JSON.stringify(memory)); }
-
-// Эффект «печатающегося текста» на табличке
-async function typeTablet(text){
-  tablet.textContent="";
-  for(let i=0;i<=text.length;i++){
-    tablet.textContent=text.substring(0,i);
-    await new Promise(r=>setTimeout(r,25));
+// 3. Состояния робота
+const setRobotState = (state) => {
+  switch(state) {
+    case 'listen':
+      eyes.forEach(e => e.style.background = "#ff00ff");
+      smile.style.height = "10px";
+      smile.style.borderRadius = "50%";
+      break;
+    case 'think':
+      eyes.forEach(e => e.style.animation = "pulse 1s infinite");
+      break;
+    case 'idle':
+      eyes.forEach(e => {
+        e.style.background = "#00f2ff";
+        e.style.animation = "none";
+      });
+      smile.style.height = "2px";
+      break;
   }
-}
+};
 
-// --- Cloudflare Worker ---
-async function askAI(text){
-  try{
-    const res=await fetch("https://pukipuki.damp-glade-283e.workers.dev/",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({message:text})
+// 4. Интеграция с AI
+async function askAI(message) {
+  setRobotState('think');
+  tabletText.textContent = "Хм... дай подумать...";
+  
+  try {
+    const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
     });
-    const data=await res.json();
-    return data.answer||"Я пока не знаю 😅";
-  }catch{
-    return "Связь с ИИ временно недоступна 💥";
+    const data = await response.json();
+    return data.answer || "Я не смог найти ответ, попробуй еще раз!";
+  } catch (error) {
+    return "Ой, кажется, у меня пропала связь с мозгом (ошибка сети).";
+  } finally {
+    setRobotState('idle');
   }
 }
 
-// --- Ответ робота ---
-async function respond(text){
-  if(memory[text]){
-    await typeTablet(memory[text]);
-    gesture(memory[text].toLowerCase().includes("нет")?false:true);
+// 5. Голосовое управление
+micBtn.onclick = () => {
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Speech) {
+    typeWriter("Твой браузер не поддерживает голос. Используй Chrome.");
     return;
   }
-  const answer=await askAI(text);
-  memory[text]=answer;
-  saveMemory();
-  await typeTablet(answer);
-  gesture(answer.toLowerCase().includes("нет")?false:true);
-}
 
-// --- Голосовой ввод ---
-micBtn.onclick=()=>{
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SpeechRecognition){ tablet.textContent="Твой браузер не поддерживает голос. Попробуй Chrome!"; return; }
-  const recognition = new SpeechRecognition();
-  recognition.lang="ru-RU";
-  recognition.interimResults=false;
-  recognition.onstart=()=>{ tablet.textContent="Слушаю тебя... 🎧"; };
-  recognition.onerror=()=>{ tablet.textContent="Не удалось распознать голос. Попробуй ещё раз!"; };
-  recognition.onresult=async(e)=>{
-    const transcript=e.results[0][0].transcript;
-    await respond(transcript);
+  const rec = new Speech();
+  rec.lang = 'ru-RU';
+
+  rec.onstart = () => {
+    setRobotState('listen');
+    tabletText.textContent = "Слушаю тебя внимательно...";
   };
-  recognition.start();
+
+  rec.onerror = () => {
+    setRobotState('idle');
+    typeWriter("Я ничего не услышал...");
+  };
+
+  rec.onresult = async (event) => {
+    const query = event.results[0][0].transcript;
+    const answer = await askAI(query);
+    await typeWriter(answer);
+  };
+
+  rec.start();
 };
