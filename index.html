@@ -3,28 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PukiPuki — твой робот-друг</title>
+  <title>PukiPuki AI — Premium Edition</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="robot-container">
-
-  <!-- Робот в центре -->
-  <div id="robot">
-    <div id="face">
-      <div class="eye left"></div>
-      <div class="eye right"></div>
-      <div class="smile"></div>
+<div class="scene">
+  <div class="robot-wrapper">
+    <div class="robot-shadow"></div>
+    
+    <div id="robot">
+      <div id="face">
+        <div class="eye-socket">
+          <div class="eye left"></div>
+        </div>
+        <div class="eye-socket">
+          <div class="eye right"></div>
+        </div>
+        <div class="mouth-container">
+          <div class="smile"></div>
+        </div>
+      </div>
+      
+      <div class="arm left-arm"></div>
+      <div class="arm right-arm"></div>
+      
+      <div id="tablet">
+        <span class="status-dot"></span>
+        <div class="text-content">Привет! Нажми на микрофон, чтобы начать.</div>
+      </div>
     </div>
-    <div class="arm left"></div>
-    <div class="arm right"></div>
-    <div id="tablet">Нажми 🎤 и скажи что-нибудь</div>
   </div>
 
-  <!-- Кнопка микрофона -->
-  <button id="micBtn">🎤</button>
-
+  <button id="micBtn" title="Начать говорить">
+    <div class="pulse-ring"></div>
+    🎤
+  </button>
 </div>
 
 <script src="script.js"></script>
