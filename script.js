@@ -1,52 +1,62 @@
-const card = document.getElementById("card");
-const head = document.getElementById("face");
+// DOM элементы
+const chatWindow = document.getElementById("chat");
+const userInput = document.getElementById("userInput");
+const talkBtn = document.getElementById("talkBtn");
+const status = document.getElementById("status");
+
+const robotFace = document.getElementById("face");
 const eyes = document.querySelectorAll(".eye");
 const leftArm = document.querySelector(".arm.left");
 const rightArm = document.querySelector(".arm.right");
-const talkBtn = document.getElementById("talkBtn");
 
-// --- Моргание глаз ---
+// Моргание глаз
 setInterval(() => {
   eyes.forEach(e => e.style.height = "6px");
-  setTimeout(() => eyes.forEach(e => e.style.height = "50px"), 180);
+  setTimeout(() => eyes.forEach(e => e.style.height = "40px"), 180);
 }, 2500);
 
-// --- Жесты ---
-function yes() {
-  head.style.transform = "rotate(6deg)";
+// Жесты
+function gesture(yes = true) {
   rightArm.style.transform = "rotate(25deg)";
   leftArm.style.transform = "rotate(-15deg)";
+  robotFace.style.transform = yes ? "rotate(5deg)" : "rotate(-5deg)";
   setTimeout(() => {
-    head.style.transform = "rotate(0deg)";
     rightArm.style.transform = "rotate(0deg)";
     leftArm.style.transform = "rotate(0deg)";
+    robotFace.style.transform = "rotate(0deg)";
   }, 500);
 }
 
-function no() {
-  head.style.transform = "rotate(-6deg)";
-  rightArm.style.transform = "rotate(25deg)";
-  leftArm.style.transform = "rotate(-15deg)";
-  setTimeout(() => {
-    head.style.transform = "rotate(0deg)";
-    rightArm.style.transform = "rotate(0deg)";
-    leftArm.style.transform = "rotate(0deg)";
-  }, 500);
-}
-
-// --- Имя пользователя ---
-let userName = localStorage.getItem("robotUserName");
-if (!userName) {
-  userName = prompt("Привет! Как тебя зовут?");
-  localStorage.setItem("robotUserName", userName);
-}
-
-// --- Память робота ---
+// Память
 let memory = JSON.parse(localStorage.getItem("robotMemory") || "{}");
 function saveMemory() { localStorage.setItem("robotMemory", JSON.stringify(memory)); }
 
-// --- Cloudflare Worker ---
-async function askCloudAI(text) {
+// Добавление сообщения в чат
+function addMessage(text, sender = "user") {
+  const msg = document.createElement("div");
+  msg.className = `message ${sender}`;
+  msg.textContent = text;
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+// Эффект печатающегося текста
+async function typeMessage(text) {
+  const msg = document.createElement("div");
+  msg.className = "message bot";
+  chatWindow.appendChild(msg);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+
+  for (let i = 0; i <= text.length; i++) {
+    msg.textContent = text.substring(0, i);
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    await new Promise(r => setTimeout(r, 25));
+  }
+}
+
+// --- Обращение к Cloudflare Worker ---
+async function askAI(text) {
+  status.style.opacity = 1;
   try {
     const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
       method: "POST",
@@ -54,63 +64,59 @@ async function askCloudAI(text) {
       body: JSON.stringify({ message: text })
     });
     const data = await response.json();
-    return data.answer || "Я пока не знаю 🤔";
+    status.style.opacity = 0;
+    return data.answer || "Я пока не знаю 😅";
   } catch {
+    status.style.opacity = 0;
     return "Связь с ИИ временно недоступна 💥";
   }
 }
 
-// --- Основной ответ ---
-async function respondAI(text) {
-  text = text.toLowerCase();
+// --- Основная функция ответа ---
+async function respond(text) {
+  addMessage(text, "user");
 
-  // Математика
-  if (/\d+\s*[\+\-\*\/]\s*\d+/.test(text)) {
-    try {
-      const answer = eval(text);
-      card.textContent = `Ответ: ${answer}`;
-      yes();
-      return;
-    } catch { card.textContent = "Ошибка 😅"; no(); return; }
-  }
-
-  const key = text + "||" + userName;
-  if (memory[key]) {
-    card.textContent = memory[key];
-    memory[key].toLowerCase().includes("нет") ? no() : yes();
+  // Проверка на память
+  if (memory[text]) {
+    await typeMessage(memory[text]);
+    memory[text].includes("нет") ? gesture(false) : gesture(true);
     return;
   }
 
-  const cloudAnswer = await askCloudAI(text);
-  card.textContent = cloudAnswer;
-  cloudAnswer.toLowerCase().includes("нет") ? no() : yes();
-
-  memory[key] = cloudAnswer;
+  const answer = await askAI(text);
+  memory[text] = answer;
   saveMemory();
+  await typeMessage(answer);
+  answer.toLowerCase().includes("нет") ? gesture(false) : gesture(true);
 }
 
 // --- Голосовой ввод ---
 talkBtn.onclick = () => {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    card.textContent = "Браузер не поддерживает голос. Используй Safari!";
+    addMessage("Твой браузер не поддерживает голос. Попробуй Chrome!", "bot");
     return;
   }
 
   const recognition = new SpeechRecognition();
   recognition.lang = "ru-RU";
   recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
 
-  card.textContent = "🎧 Слушаю тебя…";
-
+  recognition.onstart = () => { status.style.opacity = 1; status.textContent = "Слушаю тебя... 🎧"; };
+  recognition.onerror = () => { status.style.opacity = 0; addMessage("Не удалось распознать голос. Попробуй ещё раз!", "bot"); };
   recognition.onresult = async (event) => {
     const transcript = event.results[0][0].transcript;
-    card.textContent = `Ты: "${transcript}" — Думаю... 💭`;
-    await respondAI(transcript);
+    status.style.opacity = 0;
+    respond(transcript);
   };
-
-  recognition.onerror = () => { card.textContent = "Не удалось распознать голос. Попробуй ещё раз!"; };
 
   recognition.start();
 };
+
+// --- Отправка через Enter ---
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && userInput.value.trim() !== "") {
+    respond(userInput.value.trim());
+    userInput.value = "";
+  }
+});
