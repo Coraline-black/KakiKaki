@@ -53,7 +53,7 @@ async function askAI(message) {
         sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
         await typeWriter(answer);       // ждём, пока весь текст выведется
-        setStatus('idle');              // после вывода текста глаза возвращаются к синим
+        setStatus('idle');              // после завершения глаза возвращаются к синим
 
     } catch {
         await typeWriter("Я рядом 🤍 Попробуем ещё раз");
