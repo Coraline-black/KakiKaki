@@ -1,4 +1,4 @@
-Const tabletText = document.querySelector("#tablet .text-content");
+const tabletText = document.querySelector("#tablet .text-content");
 const micBtn = document.getElementById("micBtn");
 const eyes = document.querySelectorAll(".eye");
 
@@ -32,34 +32,30 @@ function setStatus(status) {
 
 async function askAI(message) {
     setStatus('think');
+    tabletText.textContent = "Думаю… 🤍";
 
-    // сохраняем вопрос в память
     memory.push({ role: "user", content: message });
 
     try {
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                message,
-                memory // 🔥 передаём ВСЮ историю
-            })
+            body: JSON.stringify({ message, memory })
         });
 
         const data = await response.json();
         setStatus('idle');
 
-        const answer = data.answer || "Я задумался...";
+        const answer = data.answer || "Я здесь 🤍";
         memory.push({ role: "assistant", content: answer });
 
-        // ограничиваем память (чтобы не ломалось)
         if (memory.length > 20) memory = memory.slice(-20);
 
         await typeWriter(answer);
 
-    } catch (e) {
+    } catch {
         setStatus('idle');
-        await typeWriter("Связь прервалась… попробуй ещё раз 💭");
+        await typeWriter("Связь немного прервалась, но я снова с тобой 🤍");
     }
 }
 
@@ -83,14 +79,13 @@ micBtn.onclick = () => {
     recognition.onstart = () => {
         isListening = true;
         setStatus("listen");
-        tabletText.textContent = "Слушаю…";
+        tabletText.textContent = "Слушаю тебя… 🎧";
     };
 
     recognition.onresult = (e) => {
         const text = e.results[0][0].transcript;
         isListening = false;
-        recognition.stop();
-        askAI(text);
+        askAI(text); // ✅ БЕЗ stop()
     };
 
     recognition.onerror = () => {
@@ -104,4 +99,4 @@ micBtn.onclick = () => {
     };
 
     recognition.start();
-}; 
+};
