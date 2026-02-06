@@ -14,70 +14,44 @@ function setStatus(status) {
     eyes.forEach(e => {
         e.style.animation = "none";
         if (status === 'think') {
-            e.style.background = "#ffcc00"; // Желтый — думает
-            e.style.boxShadow = "0 0 15px #ffcc00";
+            e.style.background = "#ffcc00"; 
             e.style.animation = "pulse 0.5s infinite alternate"; 
         } else if (status === 'listen') {
-            e.style.background = "#ff00ff"; // Розовый — слушает
-            e.style.boxShadow = "0 0 15px #ff00ff";
+            e.style.background = "#ff00ff";
         } else {
-            e.style.background = "#00f2ff"; // Голубой — ждет
-            e.style.boxShadow = "0 0 15px #00f2ff";
+            e.style.background = "#00f2ff";
         }
     });
 }
 
 async function askAI(message) {
     setStatus('think');
-    tabletText.textContent = "Пуки думает...";
-    
     try {
-        // Мы отправляем запрос на твой воркер
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message: message }) // Передаем только текст
+            body: JSON.stringify({ message: message }) // Только суть, без лишних настроек
         });
         
         const data = await response.json();
         setStatus('idle');
         
-        // Берем ответ из поля answer, которое мы настроили в Cloudflare
-        const finalAnswer = data.answer || "Я получил пустой ответ от процессора...";
-        await typeWriter(finalAnswer);
+        // Отображаем ответ из поля answer нашего воркера
+        await typeWriter(data.answer || "Я задумался...");
         
     } catch (e) {
         setStatus('idle');
-        await typeWriter("Ошибка связи! Проверь интернет или воркер. 💥");
-        console.error("Критическая ошибка:", e);
+        await typeWriter("Связь прервалась... Попробуй еще раз!");
     }
 }
 
 micBtn.onclick = () => {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!Speech) {
-        alert("Твой браузер не поддерживает голосовой ввод. Попробуй Chrome или Safari.");
-        return;
-    }
-    
+    if (!Speech) return alert("Браузер не поддерживает голос.");
     const rec = new Speech();
     rec.lang = 'ru-RU';
-    
-    rec.onstart = () => { 
-        setStatus('listen'); 
-        tabletText.textContent = "Слушаю тебя..."; 
-    };
-    
-    rec.onresult = (e) => {
-        const result = e.results[0][0].transcript;
-        askAI(result);
-    };
-    
-    rec.onerror = (err) => {
-        setStatus('idle');
-        tabletText.textContent = "Я не расслышал, повтори?";
-        console.error("Ошибка распознавания:", err);
-    };
-    
+    rec.onstart = () => { setStatus('listen'); tabletText.textContent = "Слушаю..."; };
+    rec.onresult = (e) => askAI(e.results[0][0].transcript);
+    rec.onerror = () => setStatus('idle');
     rec.start();
 };
