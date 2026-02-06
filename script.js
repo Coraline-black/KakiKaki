@@ -18,20 +18,21 @@ function setStatus(status) {
     eyes.forEach(e => {
         e.style.animation = "none";
         if (status === 'think') {
-            e.style.background = "#ffd966"; // желтые глаза при обдумывании
+            e.style.background = "#ffd966"; // желтые глаза
             e.style.animation = "pulse 0.6s infinite alternate";
         } else if (status === 'listen') {
-            e.style.background = "#ff66ff"; // фиолетовые глаза при прослушивании
+            e.style.background = "#ff66ff"; // фиолетовые глаза
         } else {
-            e.style.background = "#00f2ff"; // синие глаза обычно
+            e.style.background = "#00f2ff"; // синие глаза
         }
     });
 }
 
 async function askAI(message) {
-    setStatus('think');
+    setStatus('think');              // включаем желтые глаза
     tabletText.textContent = "Думаю… 🤍";
 
+    // сохраняем вопрос пользователя
     memory.push({ role: "user", content: message });
     if (memory.length > 20) memory = memory.slice(-20);
     sessionStorage.setItem("robotMemory", JSON.stringify(memory));
@@ -40,22 +41,23 @@ async function askAI(message) {
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, memory })
+            body: JSON.stringify({ message, memory }) // отправляем память для контекста
         });
 
         const data = await response.json();
         const answer = data.answer || "Я здесь 🤍";
 
+        // сохраняем ответ ИИ
         memory.push({ role: "assistant", content: answer });
         if (memory.length > 20) memory = memory.slice(-20);
         sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
-        setStatus('idle');
-        await typeWriter(answer);
+        await typeWriter(answer);       // ждём, пока весь текст выведется
+        setStatus('idle');              // после вывода текста глаза возвращаются к синим
 
     } catch {
-        setStatus('idle');
         await typeWriter("Я рядом 🤍 Попробуем ещё раз");
+        setStatus('idle');              // после ошибки тоже возвращаем синие глаза
     }
 }
 
@@ -94,7 +96,7 @@ micBtn.onclick = () => {
 
     recognition.onend = () => {
         isListening = false;
-        setStatus('idle'); // синие глаза
+        setStatus('idle'); // синие глаза после окончания
     };
 
     recognition.start();
@@ -114,3 +116,13 @@ sendBtn.onclick = () => {
 textInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") sendBtn.click();
 });
+
+/* ===== CSS-анимация для пульсации глаз ===== */
+const style = document.createElement('style');
+style.innerHTML = `
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}`;
+document.head.appendChild(style);
