@@ -4,8 +4,6 @@ const eyes = document.querySelectorAll(".eye");
 
 let recognition = null;
 let isListening = false;
-
-// 🧠 БОЛЬШАЯ ПАМЯТЬ
 let memory = [];
 
 async function typeWriter(text) {
@@ -32,8 +30,6 @@ function setStatus(status) {
 
 async function askAI(message) {
     setStatus('think');
-
-    // сохраняем вопрос в память
     memory.push({ role: "user", content: message });
 
     try {
@@ -42,7 +38,7 @@ async function askAI(message) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 message,
-                memory // 🔥 передаём ВСЮ историю
+                memory 
             })
         });
 
@@ -52,7 +48,6 @@ async function askAI(message) {
         const answer = data.answer || "Я задумался...";
         memory.push({ role: "assistant", content: answer });
 
-        // ограничиваем память (чтобы не ломалось)
         if (memory.length > 20) memory = memory.slice(-20);
 
         await typeWriter(answer);
@@ -63,15 +58,23 @@ async function askAI(message) {
     }
 }
 
+// ГЛАВНАЯ ФУНКЦИЯ ДЛЯ ТЕЛЕФОНОВ
 micBtn.onclick = () => {
     if (isListening) return;
 
-    const Speech =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
+    // Магия для iOS: "пробуждаем" аудио-движок
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+        const audioCtx = new AudioContext();
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+    }
+
+    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!Speech) {
-        alert("Голос не поддерживается на этом устройстве 😔");
+        alert("Голос не поддерживается. Пожалуйста, используй Safari на iPhone или Chrome на Android! 😔");
         return;
     }
 
@@ -79,6 +82,7 @@ micBtn.onclick = () => {
     recognition.lang = "ru-RU";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
+    recognition.continuous = false; // Важно для мобильных: одна фраза - одна сессия
 
     recognition.onstart = () => {
         isListening = true;
@@ -93,15 +97,27 @@ micBtn.onclick = () => {
         askAI(text);
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (event) => {
         isListening = false;
         setStatus("idle");
+        console.error("Speech kit error:", event.error);
+        if (event.error === 'not-allowed') {
+            alert("Пожалуйста, разреши доступ к микрофону в настройках твоего телефона!");
+        }
     };
 
     recognition.onend = () => {
         isListening = false;
-        setStatus("idle");
+        if (tabletText.textContent === "Слушаю…") {
+             setStatus("idle");
+             tabletText.textContent = "Нажми снова, я не расслышал...";
+        }
     };
 
-    recognition.start();
+    // Запуск на мобильных устройствах иногда требует задержки
+    try {
+        recognition.start();
+    } catch (e) {
+        console.log("Recognition уже запущен или заблокирован");
+    }
 };
