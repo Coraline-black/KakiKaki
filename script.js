@@ -4,6 +4,7 @@ const eyes = document.querySelectorAll(".eye");
 
 // ===== ПАМЯТЬ на время сессии =====
 let memory = JSON.parse(sessionStorage.getItem("robotMemory")) || [];
+let isListening = false;
 
 async function typeWriter(text) {
     tabletText.textContent = "";
@@ -17,12 +18,12 @@ function setStatus(status) {
     eyes.forEach(e => {
         e.style.animation = "none";
         if (status === 'think') {
-            e.style.background = "#ffd966";
+            e.style.background = "#ffd966"; // желтые глаза при обдумывании
             e.style.animation = "pulse 0.6s infinite alternate";
         } else if (status === 'listen') {
-            e.style.background = "#ff66ff";
+            e.style.background = "#ff66ff"; // фиолетовые глаза при прослушивании
         } else {
-            e.style.background = "#00f2ff";
+            e.style.background = "#00f2ff"; // синие глаза обычно
         }
     });
 }
@@ -31,28 +32,22 @@ async function askAI(message) {
     setStatus('think');
     tabletText.textContent = "Думаю… 🤍";
 
-    // сохраняем вопрос пользователя
     memory.push({ role: "user", content: message });
     if (memory.length > 20) memory = memory.slice(-20);
-
-    // сохраняем память в sessionStorage
     sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
     try {
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, memory }) // отправляем всю память
+            body: JSON.stringify({ message, memory })
         });
 
         const data = await response.json();
         const answer = data.answer || "Я здесь 🤍";
 
-        // сохраняем ответ ИИ
         memory.push({ role: "assistant", content: answer });
         if (memory.length > 20) memory = memory.slice(-20);
-
-        // обновляем память
         sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
         setStatus('idle');
@@ -64,11 +59,12 @@ async function askAI(message) {
     }
 }
 
+// ===== ГОЛОСОВОЙ ВВОД (через кнопку) =====
 micBtn.onclick = () => {
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!Speech) {
-        tabletText.textContent = "На этом телефоне я лучше понимаю текст 🤍";
+        tabletText.textContent = "На этом устройстве голосовой ввод недоступен. Используй текст 🤍";
         return;
     }
 
@@ -77,15 +73,18 @@ micBtn.onclick = () => {
 
     const recognition = new Speech();
     recognition.lang = "ru-RU";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
 
     recognition.onstart = () => {
-        setStatus('listen');
+        setStatus('listen'); // фиолетовые глаза
         tabletText.textContent = "Я слушаю тебя… 🎧";
     };
 
-    recognition.onresult = (e) => {
+    recognition.onresult = (event) => {
         isListening = false;
-        askAI(e.results[0][0].transcript);
+        const transcript = event.results[0][0].transcript;
+        askAI(transcript);
     };
 
     recognition.onerror = () => {
@@ -95,13 +94,13 @@ micBtn.onclick = () => {
 
     recognition.onend = () => {
         isListening = false;
-        setStatus('idle');
+        setStatus('idle'); // синие глаза
     };
 
     recognition.start();
 };
 
-/* ===== ТЕКСТОВЫЙ ВВОД ===== */
+// ===== ТЕКСТОВЫЙ ВВОД (запасной вариант) =====
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 
