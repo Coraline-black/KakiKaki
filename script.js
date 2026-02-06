@@ -29,10 +29,9 @@ function setStatus(status) {
 }
 
 async function askAI(message) {
-    setStatus('think');              // включаем желтые глаза
+    setStatus('think');              // Включаем желтые глаза (начало обработки)
     tabletText.textContent = "Думаю… 🤍";
 
-    // сохраняем вопрос пользователя
     memory.push({ role: "user", content: message });
     if (memory.length > 20) memory = memory.slice(-20);
     sessionStorage.setItem("robotMemory", JSON.stringify(memory));
@@ -41,28 +40,37 @@ async function askAI(message) {
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, memory }) // отправляем память для контекста
+            body: JSON.stringify({ message, memory }) 
         });
 
         const data = await response.json();
         const answer = data.answer || "Я здесь 🤍";
 
-        // сохраняем ответ ИИ
         memory.push({ role: "assistant", content: answer });
         if (memory.length > 20) memory = memory.slice(-20);
         sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
-        await typeWriter(answer);       // ждём, пока весь текст выведется
-        setStatus('idle');              // после завершения глаза возвращаются к синим
+        // Глаза ВСЁ ЕЩЕ желтые, пока идет анимация текста
+        await typeWriter(answer);       
+        
+        // ТОЛЬКО ТЕПЕРЬ, когда текст полностью напечатан, возвращаем синий цвет
+        setStatus('idle');              
 
     } catch {
         await typeWriter("Я рядом 🤍 Попробуем ещё раз");
-        setStatus('idle');              // после ошибки тоже возвращаем синие глаза
+        setStatus('idle');              
     }
 }
 
 // ===== ГОЛОСОВОЙ ВВОД (через кнопку) =====
 micBtn.onclick = () => {
+    // Магия для iPhone (активация аудио-контекста)
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (AudioContext) {
+        const ctx = new AudioContext();
+        if (ctx.state === 'suspended') ctx.resume();
+    }
+
     const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!Speech) {
@@ -96,7 +104,10 @@ micBtn.onclick = () => {
 
     recognition.onend = () => {
         isListening = false;
-        setStatus('idle'); // синие глаза после окончания
+        // Если робот не перешел в режим "думает" (желтый), возвращаем синий
+        if (tabletText.textContent !== "Думаю… 🤍") {
+            setStatus('idle');
+        }
     };
 
     recognition.start();
@@ -106,23 +117,28 @@ micBtn.onclick = () => {
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 
-sendBtn.onclick = () => {
-    const text = textInput.value.trim();
-    if (!text) return;
-    textInput.value = "";
-    askAI(text);
-};
+if (sendBtn && textInput) {
+    sendBtn.onclick = () => {
+        const text = textInput.value.trim();
+        if (!text) return;
+        textInput.value = "";
+        askAI(text);
+    };
 
-textInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendBtn.click();
-});
+    textInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendBtn.click();
+    });
+}
 
 /* ===== CSS-анимация для пульсации глаз ===== */
-const style = document.createElement('style');
-style.innerHTML = `
-@keyframes pulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}`;
-document.head.appendChild(style);
+if (!document.getElementById('pulse-style')) {
+    const style = document.createElement('style');
+    style.id = 'pulse-style';
+    style.innerHTML = `
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }`;
+    document.head.appendChild(style);
+}
