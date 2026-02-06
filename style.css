@@ -1,109 +1,169 @@
-const tabletText = document.querySelector("#tablet .text-content");
-const micBtn = document.getElementById("micBtn");
-const eyes = document.querySelectorAll(".eye");
-
-let memory = [];
-let isListening = false;
-
-async function typeWriter(text) {
-    tabletText.textContent = "";
-    for (let char of text) {
-        tabletText.textContent += char;
-        await new Promise(r => setTimeout(r, 25));
-    }
+:root {
+  --bg-color: #0a0a12;
+  --accent-color: #00f2ff;
+  --robot-color: #1e1e2e;
+  --glass-bg: rgba(255, 255, 255, 0.05);
 }
 
-function setStatus(status) {
-    eyes.forEach(e => {
-        e.style.animation = "none";
-        if (status === 'think') {
-            e.style.background = "#ffd966";
-            e.style.animation = "pulse 0.6s infinite alternate";
-        } else if (status === 'listen') {
-            e.style.background = "#ff66ff";
-        } else {
-            e.style.background = "#00f2ff";
-        }
-    });
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg-color);
+  background-image: 
+    radial-gradient(circle at 50% 50%, #1a1a3a 0%, #0a0a12 100%);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  color: white;
 }
 
-async function askAI(message) {
-    setStatus('think');
-    tabletText.textContent = "Думаю… 🤍";
-
-    memory.push({ role: "user", content: message });
-    if (memory.length > 20) memory = memory.slice(-20);
-
-    try {
-        const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, memory })
-        });
-
-        const data = await response.json();
-        const answer = data.answer || "Я здесь 🤍";
-
-        memory.push({ role: "assistant", content: answer });
-        if (memory.length > 20) memory = memory.slice(-20);
-
-        setStatus('idle');
-        await typeWriter(answer);
-
-    } catch {
-        setStatus('idle');
-        await typeWriter("Я рядом 🤍 Попробуем ещё раз");
-    }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
 }
 
-micBtn.onclick = () => {
-    const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
+@keyframes shadow-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(0.8); opacity: 0.2; }
+}
 
-    if (!Speech) {
-        tabletText.textContent = "На этом телефоне я лучше понимаю текст 🤍";
-        return;
-    }
+.robot-wrapper {
+  position: relative;
+  animation: float 4s ease-in-out infinite;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-    if (isListening) return;
-    isListening = true;
+#robot { position: relative; z-index: 2; }
 
-    const recognition = new Speech();
-    recognition.lang = "ru-RU";
+#face {
+  width: 160px; height: 160px;
+  background: var(--robot-color);
+  border-radius: 45px;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 30px rgba(0, 242, 255, 0.1);
+  border: 2px solid rgba(255,255,255,0.05);
+  position: relative;
+}
 
-    recognition.onstart = () => {
-        setStatus('listen');
-        tabletText.textContent = "Я слушаю тебя… 🎧";
-    };
+.eye-socket { margin: 0 15px; }
+.eye {
+  width: 35px; height: 35px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  box-shadow: 0 0 15px var(--accent-color);
+  transition: all 0.3s ease;
+}
 
-    recognition.onresult = (e) => {
-        isListening = false;
-        askAI(e.results[0][0].transcript);
-    };
+.mouth-container {
+  position: absolute;
+  bottom: 30px;
+  width: 60px; height: 20px;
+}
+.smile {
+  width: 100%; height: 2px;
+  background: rgba(0, 242, 255, 0.5);
+  border-radius: 10px;
+  transition: all 0.3s;
+}
 
-    recognition.onerror = () => {
-        isListening = false;
-        setStatus('idle');
-    };
+.arm {
+  width: 12px; height: 60px;
+  background: var(--robot-color);
+  position: absolute;
+  top: 70px;
+  border-radius: 10px;
+}
+.left-arm { left: -25px; transform: rotate(10deg); }
+.right-arm { right: -25px; transform: rotate(-10deg); }
 
-    recognition.onend = () => {
-        isListening = false;
-        setStatus('idle');
-    };
+#tablet {
+  margin-top: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-    recognition.start();
-};
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  background: var(--accent-color);
+  border-radius: 50%;
+  margin-bottom: 10px;
+  animation: pulse 1.5s infinite;
+}
+
+#micBtn {
+  position: fixed;
+  bottom: 40px;
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-color);
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+#micBtn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 30px var(--accent-color);
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 /* ===== ДОБАВЛЕНО: ТЕКСТОВЫЙ ВВОД ===== */
-const textInput = document.getElementById("textInput");
-const sendBtn = document.getElementById("sendBtn");
+#chatInput {
+  position: fixed;
+  bottom: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+  width: 90%;
+  max-width: 420px;
+  z-index: 9;
+}
 
-sendBtn.onclick = () => {
-    const text = textInput.value.trim();
-    if (!text) return;
-    textInput.value = "";
-    askAI(text);
-};
+#textInput {
+  flex: 1;
+  padding: 14px 18px;
+  border-radius: 20px;
+  border: none;
+  outline: none;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 16px;
+  backdrop-filter: blur(10px);
+}
 
-textInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") sendBtn.click();
-});
+#textInput::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+#sendBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-color);
+  color: black;
+  font-size: 20px;
+  cursor: pointer;
+}
