@@ -2,7 +2,7 @@ const tabletText = document.querySelector("#tablet .text-content");
 const micBtn = document.getElementById("micBtn");
 const eyes = document.querySelectorAll(".eye");
 
-// ===== ПАМЯТЬ Сохраняемая на время сессии =====
+// ===== ПАМЯТЬ на время сессии =====
 let memory = JSON.parse(sessionStorage.getItem("robotMemory")) || [];
 
 async function typeWriter(text) {
@@ -31,26 +31,28 @@ async function askAI(message) {
     setStatus('think');
     tabletText.textContent = "Думаю… 🤍";
 
+    // сохраняем вопрос пользователя
     memory.push({ role: "user", content: message });
     if (memory.length > 20) memory = memory.slice(-20);
 
-    // ===== сохраняем память в sessionStorage =====
+    // сохраняем память в sessionStorage
     sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
     try {
         const response = await fetch("https://pukipuki.damp-glade-283e.workers.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ message, memory })
+            body: JSON.stringify({ message, memory }) // отправляем всю память
         });
 
         const data = await response.json();
         const answer = data.answer || "Я здесь 🤍";
 
+        // сохраняем ответ ИИ
         memory.push({ role: "assistant", content: answer });
         if (memory.length > 20) memory = memory.slice(-20);
 
-        // ===== обновляем память после ответа =====
+        // обновляем память
         sessionStorage.setItem("robotMemory", JSON.stringify(memory));
 
         setStatus('idle');
@@ -99,7 +101,7 @@ micBtn.onclick = () => {
     recognition.start();
 };
 
-/* ===== ДОБАВЛЕНО: ТЕКСТОВЫЙ ВВОД ===== */
+/* ===== ТЕКСТОВЫЙ ВВОД ===== */
 const textInput = document.getElementById("textInput");
 const sendBtn = document.getElementById("sendBtn");
 
