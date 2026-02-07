@@ -1,7 +1,7 @@
 :root {
-  --bg-color: #0a0a12;
+  --bg-color: #050508; /* Более глубокий черный */
   --accent-color: #00f2ff;
-  --robot-color: #1e1e2e;
+  --robot-color: #000000; /* Лицо теперь черное как экран */
   --glass-bg: rgba(255, 255, 255, 0.05);
 }
 
@@ -10,8 +10,7 @@
 body {
   font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg-color);
-  background-image: 
-    radial-gradient(circle at 50% 50%, #1a1a3a 0%, #0a0a12 100%);
+  background-image: radial-gradient(circle at 50% 50%, #111122 0%, #050508 100%);
   height: 100vh;
   display: flex;
   justify-content: center;
@@ -20,14 +19,10 @@ body {
   color: white;
 }
 
+/* Эффект плавания всей сцены */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
-
-@keyframes shadow-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(0.8); opacity: 0.2; }
+  50% { transform: translateY(-15px); }
 }
 
 .robot-wrapper {
@@ -38,132 +33,139 @@ body {
   align-items: center;
 }
 
-#robot { position: relative; z-index: 2; }
-
+/* ЛИЦО РОБОТА (как черный экран на фото) */
 #face {
-  width: 160px; height: 160px;
+  width: 180px; 
+  height: 180px;
   background: var(--robot-color);
-  border-radius: 45px;
+  border-radius: 50px; /* Скругленные углы монитора */
   display: flex;
   justify-content: center;
-  padding-top: 40px;
-  box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 0 30px rgba(0, 242, 255, 0.1);
-  border: 2px solid rgba(255,255,255,0.05);
+  align-items: center; /* Центрируем глаза */
+  box-shadow: 0 0 40px rgba(0, 0, 0, 1), inset 0 0 20px rgba(255,255,255,0.05);
+  border: 3px solid #1a1a1a;
   position: relative;
+  padding: 0; /* Убираем старый паддинг */
 }
 
-.eye-socket { margin: 0 15px; }
+/* ГЛАЗА (как на фото) */
+.eye-socket { margin: 0 10px; }
+
 .eye {
-  width: 35px; height: 35px;
-  background: var(--accent-color);
+  width: 30px; 
+  height: 50px; /* Вытянутые глаза как на фото */
+  background: #ffffff; /* По умолчанию белые */
   border-radius: 50%;
-  box-shadow: 0 0 15px var(--accent-color);
-  transition: all 0.3s ease;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: blink 4s infinite; /* Автоматическое моргание */
 }
 
+/* РОТ (скрыт или минималистичен) */
 .mouth-container {
   position: absolute;
-  bottom: 30px;
-  width: 60px; height: 20px;
+  bottom: 35px;
+  width: 40px; height: 10px;
+  display: flex;
+  justify-content: center;
 }
 .smile {
-  width: 100%; height: 2px;
-  background: rgba(0, 242, 255, 0.5);
+  width: 20px; height: 4px;
+  background: rgba(255, 255, 255, 0.3);
   border-radius: 10px;
-  transition: all 0.3s;
 }
 
+/* АНИМАЦИЯ МОРГАНИЯ */
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* РУКИ (сделаем их темными, чтобы не отвлекали) */
 .arm {
-  width: 12px; height: 60px;
-  background: var(--robot-color);
+  width: 10px; height: 50px;
+  background: #111;
   position: absolute;
-  top: 70px;
+  top: 80px;
   border-radius: 10px;
+  z-index: -1;
 }
-.left-arm { left: -25px; transform: rotate(10deg); }
-.right-arm { right: -25px; transform: rotate(-10deg); }
+.left-arm { left: -15px; transform: rotate(15deg); }
+.right-arm { right: -15px; transform: rotate(-15deg); }
 
+/* ТАБЛЕТКА (ТЕКСТ) */
 #tablet {
-  margin-top: 40px;
+  margin-top: 30px;
   background: var(--glass-bg);
-  backdrop-filter: blur(15px);
-  padding: 20px;
+  backdrop-filter: blur(20px);
+  padding: 15px 25px;
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
-  max-width: 300px;
+  max-width: 320px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-size: 15px;
+  line-height: 1.4;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.7);
 }
 
 .status-dot {
   display: inline-block;
-  width: 8px; height: 8px;
+  width: 6px; height: 6px;
   background: var(--accent-color);
   border-radius: 50%;
-  margin-bottom: 10px;
-  animation: pulse 1.5s infinite;
+  margin-bottom: 8px;
 }
 
+/* КНОПКА МИКРОФОНА */
 #micBtn {
   position: fixed;
-  bottom: 40px;
-  width: 70px; height: 70px;
+  bottom: 30px;
+  width: 65px; height: 65px;
   border-radius: 50%;
   border: none;
-  background: var(--accent-color);
-  font-size: 30px;
+  background: #ffffff; /* Белая кнопка как акцент */
+  font-size: 24px;
   cursor: pointer;
   z-index: 10;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  transition: all 0.3s;
 }
+#micBtn:hover { transform: scale(1.1); box-shadow: 0 0 30px #ffffff; }
 
-#micBtn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 0 30px var(--accent-color);
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* ===== ДОБАВЛЕНО: ТЕКСТОВЫЙ ВВОД ===== */
+/* ПОЛЕ ВВОДА */
 #chatInput {
   position: fixed;
-  bottom: 130px;
+  bottom: 110px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 10px;
-  width: 90%;
-  max-width: 420px;
+  width: 85%;
+  max-width: 400px;
   z-index: 9;
 }
 
 #textInput {
   flex: 1;
-  padding: 14px 18px;
-  border-radius: 20px;
-  border: none;
-  outline: none;
-  background: rgba(255,255,255,0.08);
+  padding: 12px 18px;
+  border-radius: 25px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,0,0,0.6);
   color: white;
-  font-size: 16px;
-  backdrop-filter: blur(10px);
-}
-
-#textInput::placeholder {
-  color: rgba(255,255,255,0.5);
+  outline: none;
 }
 
 #sendBtn {
-  width: 48px;
-  height: 48px;
+  width: 45px; height: 45px;
   border-radius: 50%;
   border: none;
-  background: var(--accent-color);
-  color: black;
-  font-size: 20px;
+  background: #fff;
   cursor: pointer;
+}
+
+/* АНИМАЦИИ СОСТОЯНИЙ (ДЛЯ SCRIPT.JS) */
+/* Пульсация глаз при "Думаю" (уже есть в JS, но тут добавим яркости) */
+@keyframes pulse {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.1); filter: brightness(1.3); }
 }
