@@ -1,171 +1,124 @@
 :root {
-  --bg-color: #050508; /* Более глубокий черный */
-  --accent-color: #00f2ff;
-  --robot-color: #000000; /* Лицо теперь черное как экран */
-  --glass-bg: rgba(255, 255, 255, 0.05);
+  --bg-color: #000000; /* Полная темнота */
+  --eye-white: #ffffff;
+  --eye-think: #ffd966;
+  --eye-listen: #ff66ff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'Inter', -apple-system, sans-serif;
   background: var(--bg-color);
-  background-image: radial-gradient(circle at 50% 50%, #111122 0%, #050508 100%);
   height: 100vh;
+  width: 100vw;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  color: white;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Эффект плавания всей сцены */
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-15px); }
-}
-
-.robot-wrapper {
-  position: relative;
-  animation: float 4s ease-in-out infinite;
+/* ФОН НА ВЕСЬ ЭКРАН */
+.scene {
+  width: 100vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* ЛИЦО ТЕПЕРЬ БЕЗ ГРАНИЦ */
+#robot {
+  width: 100%;
+  height: 60%;
+  display: flex;
+  justify-content: center;
   align-items: center;
 }
 
-/* ЛИЦО РОБОТА (как черный экран на фото) */
 #face {
-  width: 180px; 
-  height: 180px;
-  background: var(--robot-color);
-  border-radius: 50px; /* Скругленные углы монитора */
   display: flex;
   justify-content: center;
-  align-items: center; /* Центрируем глаза */
-  box-shadow: 0 0 40px rgba(0, 0, 0, 1), inset 0 0 20px rgba(255,255,255,0.05);
-  border: 3px solid #1a1a1a;
-  position: relative;
-  padding: 0; /* Убираем старый паддинг */
+  align-items: center;
+  gap: 60px;
+  width: 100%;
 }
 
-/* ГЛАЗА (как на фото) */
-.eye-socket { margin: 0 10px; }
-
+/* ГЛАЗА И ИХ ЭМОЦИИ */
 .eye {
-  width: 30px; 
-  height: 50px; /* Вытянутые глаза как на фото */
-  background: #ffffff; /* По умолчанию белые */
+  width: 50px;
+  height: 80px;
+  background: var(--eye-white);
   border-radius: 50%;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: blink 4s infinite; /* Автоматическое моргание */
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  animation: blink 5s infinite;
 }
 
-/* РОТ (скрыт или минималистичен) */
-.mouth-container {
-  position: absolute;
-  bottom: 35px;
-  width: 40px; height: 10px;
-  display: flex;
-  justify-content: center;
-}
-.smile {
-  width: 20px; height: 4px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
-}
-
-/* АНИМАЦИЯ МОРГАНИЯ */
+/* Моргание */
 @keyframes blink {
   0%, 90%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.1); }
+  93% { transform: scaleY(0.1); }
 }
 
-/* РУКИ (сделаем их темными, чтобы не отвлекали) */
-.arm {
-  width: 10px; height: 50px;
-  background: #111;
-  position: absolute;
-  top: 80px;
+/* ЭМОЦИЯ: СЛУШАЕТ (Фиолетовые и удивленные) */
+/* Когда JS меняет цвет, мы добавим изменение формы */
+.eye[style*="rgb(255, 102, 255)"] {
+  height: 90px;
+  width: 60px;
+  box-shadow: 0 0 40px var(--eye-listen);
+}
+
+/* ЭМОЦИЯ: ДУМАЕТ (Желтые и суженные/хитрые) */
+.eye[style*="rgb(255, 217, 102)"] {
+  height: 20px; /* Глаза прищуриваются */
+  width: 60px;
   border-radius: 10px;
-  z-index: -1;
+  box-shadow: 0 0 40px var(--eye-think);
 }
-.left-arm { left: -15px; transform: rotate(15deg); }
-.right-arm { right: -15px; transform: rotate(-15deg); }
 
-/* ТАБЛЕТКА (ТЕКСТ) */
+/* СКРЫВАЕМ ЛИШНИЕ ДЕТАЛИ (Руки и т.д., чтобы был только экран) */
+.arm, .robot-shadow, .status-dot { display: none; }
+
+/* ТЕКСТОВАЯ ПЛАШКА (Прозрачная и парящая) */
 #tablet {
-  margin-top: 30px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  padding: 15px 25px;
-  border-radius: 20px;
-  border: 1px solid rgba(255,255,255,0.1);
-  max-width: 320px;
+  position: absolute;
+  bottom: 25%;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  max-width: 80%;
   text-align: center;
-  font-size: 15px;
-  line-height: 1.4;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  font-size: 1.2rem;
 }
 
-.status-dot {
-  display: inline-block;
-  width: 6px; height: 6px;
-  background: var(--accent-color);
-  border-radius: 50%;
-  margin-bottom: 8px;
-}
-
-/* КНОПКА МИКРОФОНА */
+/* КНОПКА И ИНПУТ (Минимализм) */
 #micBtn {
-  position: fixed;
-  bottom: 30px;
-  width: 65px; height: 65px;
-  border-radius: 50%;
+  background: #fff;
   border: none;
-  background: #ffffff; /* Белая кнопка как акцент */
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 0 20px rgba(255,255,255,0.2);
-  transition: all 0.3s;
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  font-size: 25px;
+  bottom: 20px;
 }
-#micBtn:hover { transform: scale(1.1); box-shadow: 0 0 30px #ffffff; }
 
-/* ПОЛЕ ВВОДА */
 #chatInput {
-  position: fixed;
-  bottom: 110px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 10px;
-  width: 85%;
-  max-width: 400px;
-  z-index: 9;
+  bottom: 100px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 5px;
 }
 
 #textInput {
-  flex: 1;
-  padding: 12px 18px;
-  border-radius: 25px;
-  border: 1px solid rgba(255,255,255,0.1);
-  background: rgba(0,0,0,0.6);
-  color: white;
-  outline: none;
+  background: transparent;
+  padding: 10px 20px;
 }
 
-#sendBtn {
-  width: 45px; height: 45px;
-  border-radius: 50%;
-  border: none;
-  background: #fff;
-  cursor: pointer;
-}
-
-/* АНИМАЦИИ СОСТОЯНИЙ (ДЛЯ SCRIPT.JS) */
-/* Пульсация глаз при "Думаю" (уже есть в JS, но тут добавим яркости) */
-@keyframes pulse {
-  0% { transform: scale(1); filter: brightness(1); }
-  100% { transform: scale(1.1); filter: brightness(1.3); }
-}
+/* Скрываем улыбку, если хочешь только глаза как на фото */
+.smile { display: none; }
