@@ -1,111 +1,115 @@
 :root {
-  --bg-color: #000000;
+  --bg-color: #000;
   --eye-white: #ffffff;
-  --eye-think: #ffd966;
-  --eye-listen: #ff66ff;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
   background: var(--bg-color);
-  height: 100vh;
   width: 100vw;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  color: white;
-}
-
-.scene {
   height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
+  overflow: hidden;
+  font-family: Inter, sans-serif;
 }
 
-/* ЗОНА ЛИЦА */
+/* === СЦЕНА === */
+.scene {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* === ОБЕРТКА РОБОТА === */
 .robot-wrapper {
-  flex: 2;
+  width: 100%;
+  height: 60%;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* === ЛИЦО === */
 #face {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
 }
 
+/* === ГЛАЗА === */
 .eyes-container {
   display: flex;
-  gap: 15px; /* Глаза рядом */
+  gap: 60px;
+  margin-bottom: 25px;
 }
 
 .eye {
-  width: 45px;
-  height: 70px;
+  width: 50px;
+  height: 80px;
   background: var(--eye-white);
   border-radius: 50%;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  animation: blink 4s infinite;
+  animation: blink 5s infinite;
 }
 
+/* моргание */
+@keyframes blink {
+  0%, 90%, 100% { transform: scaleY(1); }
+  93% { transform: scaleY(0.1); }
+}
+
+/* === РОТ === */
 .mouth-container {
-  height: 20px;
   display: flex;
   justify-content: center;
 }
 
 .smile {
-  width: 35px;
-  height: 6px;
-  background: var(--eye-white);
-  border-radius: 10px;
-  transition: all 0.4s ease;
+  width: 60px;
+  height: 30px;
+  border-bottom: 4px solid white;
+  border-radius: 0 0 60px 60px;
 }
 
-/* ЗОНА ТЕКСТА */
+/* === ТЕКСТ === */
 #tablet {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
+  position: absolute;
+  bottom: 28%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.05);
   padding: 20px;
-  margin-bottom: 20px;
+  border-radius: 15px;
+  color: white;
+  max-width: 80%;
+  text-align: center;
 }
 
-/* ЗОНА КНОПОК */
+/* === КНОПКИ === */
 .controls-area {
+  position: absolute;
+  bottom: 30px;
+  width: 100%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  padding-bottom: 20px;
+  justify-content: center;
+  gap: 10px;
 }
 
 #chatInput {
   display: flex;
-  width: 100%;
-  max-width: 400px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 25px;
-  padding: 5px 15px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 30px;
+  padding: 5px;
 }
 
 #textInput {
-  flex: 1;
   background: transparent;
   border: none;
   color: white;
-  padding: 10px;
+  padding: 10px 15px;
   outline: none;
 }
 
@@ -113,48 +117,13 @@ body {
   background: none;
   border: none;
   color: white;
-  font-size: 20px;
-  cursor: pointer;
+  font-size: 18px;
 }
 
 #micBtn {
-  width: 65px;
-  height: 65px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   border: none;
-  background: white;
-  font-size: 28px;
-  cursor: pointer;
-}
-
-/* --- ЭМОЦИИ --- */
-
-/* СЛУШАЕТ (Фиолетовый + удивление) */
-.eye[style*="rgb(255, 102, 255)"] {
-  background: var(--eye-listen) !important;
-  width: 60px; height: 60px;
-  box-shadow: 0 0 30px var(--eye-listen);
-}
-.eye[style*="rgb(255, 102, 255)"] ~ .mouth-container .smile,
-.eyes-container:has(.eye[style*="rgb(255, 102, 255)"]) + .mouth-container .smile {
-  width: 25px; height: 25px;
-  border-radius: 50%;
-  background: var(--eye-listen);
-}
-
-/* ДУМАЕТ (Желтый + прищур) */
-.eye[style*="rgb(255, 217, 102)"] {
-  background: var(--eye-think) !important;
-  height: 12px; width: 60px;
-  box-shadow: 0 0 30px var(--eye-think);
-}
-.eye[style*="rgb(255, 217, 102)"] ~ .mouth-container .smile,
-.eyes-container:has(.eye[style*="rgb(255, 217, 102)"]) + .mouth-container .smile {
-  width: 50px; height: 4px;
-  background: var(--eye-think);
-}
-
-@keyframes blink {
-  0%, 90%, 100% { transform: scaleY(1); }
-  93% { transform: scaleY(0.1); }
+  font-size: 24px;
 }
