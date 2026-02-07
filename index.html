@@ -3,53 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PukiPuki AI — Premium Edition</title>
+  <title>PukiPuki AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="scene">
   <div class="robot-wrapper">
-    <div class="robot-shadow"></div>
-    
-    <div id="robot">
-      <div id="face">
-        <div class="eye-socket">
-          <div class="eye left"></div>
-        </div>
-        <div class="eye-socket">
-          <div class="eye right"></div>
-        </div>
-        <div class="mouth-container">
-          <div class="smile"></div>
-        </div>
+    <div id="face">
+      <div class="eyes-container">
+        <div class="eye left"></div>
+        <div class="eye right"></div>
       </div>
-      
-      <div class="arm left-arm"></div>
-      <div class="arm right-arm"></div>
-      
-      <div id="tablet">
-        <span class="status-dot"></span>
-        <div class="text-content">Привет! Нажми на микрофон, чтобы начать.</div>
+      <div class="mouth-container">
+        <div class="smile"></div>
       </div>
     </div>
   </div>
 
-  <button id="micBtn" title="Начать говорить">
-    <div class="pulse-ring"></div>
-    🎤
-  </button>
-</div>
+  <div id="tablet">
+    <div class="text-content">Привет! Я PukiPuki. 🤍</div>
+  </div>
 
-<!-- ДОБАВЛЕНО: текстовый ввод -->
-<div id="chatInput">
-  <input
-    id="textInput"
-    type="text"
-    placeholder="Напиши PukiPuki…"
-    autocomplete="off"
-  />
-  <button id="sendBtn">➤</button>
+  <div class="controls-area">
+    <div id="chatInput">
+      <input id="textInput" type="text" placeholder="Напиши мне..." autocomplete="off" />
+      <button id="sendBtn">➤</button>
+    </div>
+    <button id="micBtn">🎤</button>
+  </div>
 </div>
 
 <script src="script.js"></script>
