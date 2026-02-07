@@ -1,8 +1,9 @@
 :root {
-  --bg-color: #000000; /* Полная темнота */
+  --bg-color: #000000;
   --eye-white: #ffffff;
   --eye-think: #ffd966;
   --eye-listen: #ff66ff;
+  --accent: #00f2ff;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,112 +14,168 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
   font-family: 'Inter', sans-serif;
+  color: white;
 }
 
-/* ФОН НА ВЕСЬ ЭКРАН */
-.scene {
-  width: 100vw;
-  height: 100vh;
+/* 1. ЗОНА ЛИЦА (Верхняя половина) */
+.robot-wrapper {
+  flex: 2; /* Занимает больше всего места */
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
 }
 
-/* ЛИЦО ТЕПЕРЬ БЕЗ ГРАНИЦ */
-#robot {
-  width: 100%;
-  height: 60%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
 #face {
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Глаза над ртом */
   align-items: center;
-  gap: 60px;
-  width: 100%;
+  gap: 25px;
 }
 
-/* ГЛАЗА И ИХ ЭМОЦИИ */
+.eyes-container {
+  display: flex;
+  gap: 50px;
+}
+
 .eye {
-  width: 50px;
-  height: 80px;
+  width: 45px;
+  height: 70px;
   background: var(--eye-white);
   border-radius: 50%;
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  animation: blink 5s infinite;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: blink 4s infinite;
 }
 
-/* Моргание */
+/* РОТ */
+.mouth-container {
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.smile {
+  width: 40px;
+  height: 8px;
+  background: var(--eye-white);
+  border-radius: 20px;
+  transition: all 0.4s ease;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* 2. ЗОНА ТЕКСТА (Центр) */
+#tablet {
+  flex: 0.8;
+  width: 90%;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.text-content {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  color: #efefef;
+}
+
+/* 3. ЗОНА УПРАВЛЕНИЯ (Низ) */
+.controls-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding-bottom: 20px;
+}
+
+#chatInput {
+  display: flex;
+  gap: 10px;
+  width: 85%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.07);
+  padding: 8px;
+  border-radius: 30px;
+}
+
+#textInput {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 10px 15px;
+  font-size: 16px;
+}
+
+#sendBtn {
+  background: var(--eye-white);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+#micBtn {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: none;
+  background: var(--eye-white);
+  font-size: 30px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+  transition: transform 0.2s;
+}
+
+#micBtn:active { transform: scale(0.9); }
+
+/* --- ЭМОЦИИ (Перехват из JS) --- */
+
+/* 🎧 СЛУШАЕТ (Фиолетовый) */
+.eye[style*="rgb(255, 102, 255)"] {
+  height: 70px;
+  width: 70px; /* Округляются от удивления */
+  background: var(--eye-listen) !important;
+  box-shadow: 0 0 35px var(--eye-listen);
+}
+.eye[style*="rgb(255, 102, 255)"] ~ .mouth-container .smile {
+  width: 25px; height: 25px; /* Рот "О" */
+  border-radius: 50%;
+  background: var(--eye-listen);
+}
+
+/* 🧠 ДУМАЕТ (Желтый) */
+.eye[style*="rgb(255, 217, 102)"] {
+  height: 15px; /* Щурится */
+  width: 60px;
+  background: var(--eye-think) !important;
+  box-shadow: 0 0 35px var(--eye-think);
+}
+.eye[style*="rgb(255, 217, 102)"] ~ .mouth-container .smile {
+  width: 50px; height: 4px; /* Рот - тонкая линия */
+  background: var(--eye-think);
+}
+
+/* АНИМАЦИИ */
 @keyframes blink {
   0%, 90%, 100% { transform: scaleY(1); }
   93% { transform: scaleY(0.1); }
 }
 
-/* ЭМОЦИЯ: СЛУШАЕТ (Фиолетовые и удивленные) */
-/* Когда JS меняет цвет, мы добавим изменение формы */
-.eye[style*="rgb(255, 102, 255)"] {
-  height: 90px;
-  width: 60px;
-  box-shadow: 0 0 40px var(--eye-listen);
-}
-
-/* ЭМОЦИЯ: ДУМАЕТ (Желтые и суженные/хитрые) */
-.eye[style*="rgb(255, 217, 102)"] {
-  height: 20px; /* Глаза прищуриваются */
-  width: 60px;
-  border-radius: 10px;
-  box-shadow: 0 0 40px var(--eye-think);
-}
-
-/* СКРЫВАЕМ ЛИШНИЕ ДЕТАЛИ (Руки и т.д., чтобы был только экран) */
+/* Скрываем всё лишнее из старого дизайна */
 .arm, .robot-shadow, .status-dot { display: none; }
-
-/* ТЕКСТОВАЯ ПЛАШКА (Прозрачная и парящая) */
-#tablet {
-  position: absolute;
-  bottom: 25%;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 15px;
-  max-width: 80%;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
-  font-size: 1.2rem;
-}
-
-/* КНОПКА И ИНПУТ (Минимализм) */
-#micBtn {
-  background: #fff;
-  border: none;
-  width: 60px; height: 60px;
-  border-radius: 50%;
-  font-size: 25px;
-  bottom: 20px;
-}
-
-#chatInput {
-  bottom: 100px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 30px;
-  padding: 5px;
-}
-
-#textInput {
-  background: transparent;
-  padding: 10px 20px;
-}
-
-/* Скрываем улыбку, если хочешь только глаза как на фото */
-.smile { display: none; }
