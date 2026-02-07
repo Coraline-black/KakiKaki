@@ -2,38 +2,50 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>PukiPuki AI</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="scene">
+
   <div class="robot-wrapper">
-    <div id="face">
-      <div class="eyes-container">
-        <div class="eye left"></div>
-        <div class="eye right"></div>
-      </div>
-      <div class="mouth-container">
-        <div class="smile"></div>
+    <div id="robot">
+      <div id="face">
+        <div class="eyes-container">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+        </div>
+
+        <!-- Улыбка можно оставить, CSS её скрывает -->
+        <div class="mouth-container">
+          <div class="smile"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="tablet">
-    <div class="text-content">Привет! Я PukiPuki. 🤍</div>
+    <div class="text-content">Привет! Я PukiPuki 🤍</div>
   </div>
 
   <div class="controls-area">
     <div id="chatInput">
-      <input id="textInput" type="text" placeholder="Напиши мне..." autocomplete="off" />
-      <button id="sendBtn">➤</button>
+      <input
+        id="textInput"
+        type="text"
+        placeholder="Напиши мне..."
+        autocomplete="off"
+      />
+      <button id="sendBtn" type="button">➤</button>
     </div>
-    <button id="micBtn">🎤</button>
+
+    <button id="micBtn" type="button">🎤</button>
   </div>
+
 </div>
 
-<script src="script.js"></script>
+<script src="script.js" defer></script>
 </body>
 </html>
